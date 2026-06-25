@@ -1,0 +1,263 @@
+import os
+import subprocess
+import psutil
+import pyautogui
+import time
+import winapps
+
+
+APP_EXECUTABLES = {
+
+    "chrome": "chrome.exe",
+    "word": "WINWORD.EXE",
+    "excel": "EXCEL.EXE",
+    "powerpoint": "POWERPNT.EXE",
+    "spotify": "Spotify.exe",
+    "discord": "Discord.exe",
+    "calculator": "calc.exe",
+    "settings": "ms-settings:",
+    "explorer": "explorer.exe",
+    "notepad": "notepad.exe",
+    "paint": "mspaint.exe",
+    "cmd": "cmd.exe",
+    "task manager": "taskmgr.exe"
+
+}
+
+
+STORE_APPS = {
+
+    "xbox":
+        "explorer shell:AppsFolder\\Microsoft.GamingApp_8wekyb3d8bbwe!App",
+
+    "photos":
+        "explorer shell:AppsFolder\\Microsoft.Windows.Photos_8wekyb3d8bbwe!App"
+
+}
+
+
+ALIASES = {
+
+    "google chrome": "chrome",
+    "browser": "chrome",
+
+    "microsoft word": "word",
+    "ms word": "word",
+
+    "microsoft excel": "excel",
+
+    "file explorer": "explorer",
+    "windows explorer": "explorer",
+
+    "calc": "calculator",
+
+    "blue stacks": "bluestacks",
+
+    "xbox app": "xbox"
+}
+
+
+def normalize_name(name):
+
+    name = name.lower().strip()
+
+    if name in ALIASES:
+        return ALIASES[name]
+
+    return name
+
+
+def process_running(process_name):
+
+    for proc in psutil.process_iter():
+
+        try:
+
+            if process_name.lower() in proc.name().lower():
+                return True
+
+        except:
+            pass
+
+    return False
+
+
+def launch_via_search(app_name):
+
+    print(
+        "[Launcher] Falling back to Windows Search..."
+    )
+
+    pyautogui.press("win")
+
+    time.sleep(0.5)
+
+    pyautogui.write(
+        app_name,
+        interval=0.03
+    )
+
+    time.sleep(0.5)
+
+    pyautogui.press(
+        "enter"
+    )
+
+    return (
+        f"Opened {app_name} "
+        f"using Windows Search."
+    )
+
+
+def launch_native(app_name):
+
+    try:
+
+        executable = APP_EXECUTABLES.get(
+            app_name
+        )
+
+        if executable is None:
+            return False
+
+        if executable.endswith(":"):
+
+            os.system(
+                f"start {executable}"
+            )
+
+        else:
+
+            subprocess.Popen(
+                executable,
+                shell=True
+            )
+
+        return True
+
+    except:
+        return False
+
+
+def launch_store_app(app_name):
+
+    try:
+
+        command = STORE_APPS.get(
+            app_name
+        )
+
+        if command is None:
+            return False
+
+        subprocess.Popen(
+            command,
+            shell=True
+        )
+
+        return True
+
+    except:
+        return False
+
+
+def launch_installed_program(app_name):
+
+    try:
+
+        for app in winapps.list_installed():
+
+            if app_name in app.name.lower():
+
+                subprocess.Popen(
+                    app.install_location,
+                    shell=True
+                )
+
+                return True
+
+    except:
+        pass
+
+    return False
+
+
+def open_application(app_name):
+
+    app_name = normalize_name(
+        app_name
+    )
+
+    if process_running(app_name):
+
+        return (
+            f"{app_name} "
+            f"is already running."
+        )
+
+    print(
+        "[Launcher] Trying native launch..."
+    )
+
+    if launch_native(app_name):
+
+        return (
+            f"Opened {app_name}"
+        )
+
+    print(
+        "[Launcher] Trying Store App launch..."
+    )
+
+    if launch_store_app(app_name):
+
+        return (
+            f"Opened {app_name}"
+        )
+
+    print(
+        "[Launcher] Searching installed apps..."
+    )
+
+    if launch_installed_program(app_name):
+
+        return (
+            f"Opened {app_name}"
+        )
+
+    return launch_via_search(
+        app_name
+    )
+
+
+def close_application(app_name):
+
+    app_name = normalize_name(
+        app_name
+    )
+
+    killed = False
+
+    for proc in psutil.process_iter():
+
+        try:
+
+            if app_name in proc.name().lower():
+
+                proc.kill()
+
+                killed = True
+
+        except:
+            pass
+
+    if killed:
+
+        return (
+            f"Closed {app_name}"
+        )
+
+    return (
+        f"{app_name} "
+        f"was not running."
+    )

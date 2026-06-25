@@ -1,0 +1,9 @@
+Physics for JEE contains:
+
+Mechanics
+Thermodynamics
+Electrodynamics
+Modern Physics
+Optics
+SHM
+Waves

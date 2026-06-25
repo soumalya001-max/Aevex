@@ -1,0 +1,37 @@
+{
+    "llama-3.3-70b-versatile": {
+        "successes": 4,
+        "failures": 0,
+        "cooldown_until": 0
+    },
+    "meta-llama/llama-3.3-70b-instruct:free": {
+        "successes": 1,
+        "failures": 2,
+        "cooldown_until": 1782231795.4451785
+    },
+    "moonshotai/kimi-k2:free": {
+        "successes": 0,
+        "failures": 2,
+        "cooldown_until": 1782231795.955117
+    },
+    "qwen/qwen3-235b-a22b:free": {
+        "successes": 0,
+        "failures": 2,
+        "cooldown_until": 1782231796.40832
+    },
+    "mistralai/mistral-small-3.2-24b:free": {
+        "successes": 0,
+        "failures": 2,
+        "cooldown_until": 1782231796.63971
+    },
+    "qwen/qwen3-coder:free": {
+        "successes": 0,
+        "failures": 1,
+        "cooldown_until": 1782296641.3337631
+    },
+    "openai/gpt-oss-120b:free": {
+        "successes": 30,
+        "failures": 0,
+        "cooldown_until": 0
+    }
+}

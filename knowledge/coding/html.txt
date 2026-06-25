@@ -1,0 +1,15 @@
+HTML stands for HyperText Markup Language.
+
+HTML is used to create the structure of webpages.
+
+Common tags:
+
+<html>
+<head>
+<body>
+<div>
+<p>
+<h1>
+<a>
+<img>
+<form>

@@ -1,0 +1,107 @@
+{
+    "qwen/qwen3-coder:free": {
+        "success": 0,
+        "failure": 1,
+        "score": 75,
+        "last_success": 0,
+        "last_failure": 1782296611.345178
+    },
+    "openai/gpt-oss-120b:free": {
+        "success": 30,
+        "failure": 0,
+        "score": 400,
+        "last_success": 1782367448.8215327,
+        "last_failure": 0
+    },
+    "openai/gpt-oss-20b:free": {
+        "success": 0,
+        "failure": 0,
+        "score": 100,
+        "last_success": 0,
+        "last_failure": 0
+    },
+    "meta-llama/llama-3.3-70b-instruct:free": {
+        "success": 0,
+        "failure": 0,
+        "score": 100,
+        "last_success": 0,
+        "last_failure": 0
+    },
+    "nousresearch/hermes-3-llama-3.1-405b:free": {
+        "success": 0,
+        "failure": 0,
+        "score": 100,
+        "last_success": 0,
+        "last_failure": 0
+    },
+    "google/gemma-4-31b-it:free": {
+        "success": 0,
+        "failure": 0,
+        "score": 100,
+        "last_success": 0,
+        "last_failure": 0
+    },
+    "google/gemma-4-26b-a4b-it:free": {
+        "success": 0,
+        "failure": 0,
+        "score": 100,
+        "last_success": 0,
+        "last_failure": 0
+    },
+    "z-ai/glm-4.5-air:free": {
+        "success": 0,
+        "failure": 0,
+        "score": 100,
+        "last_success": 0,
+        "last_failure": 0
+    },
+    "poolside/laguna-xs.2:free": {
+        "success": 0,
+        "failure": 0,
+        "score": 100,
+        "last_success": 0,
+        "last_failure": 0
+    },
+    "poolside/laguna-m.1:free": {
+        "success": 0,
+        "failure": 0,
+        "score": 100,
+        "last_success": 0,
+        "last_failure": 0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free": {
+        "success": 0,
+        "failure": 0,
+        "score": 100,
+        "last_success": 0,
+        "last_failure": 0
+    },
+    "nvidia/nemotron-3-super-120b-a12b:free": {
+        "success": 0,
+        "failure": 0,
+        "score": 100,
+        "last_success": 0,
+        "last_failure": 0
+    },
+    "qwen/qwen3-235b-a22b:free": {
+        "success": 0,
+        "failure": 0,
+        "score": 100,
+        "last_success": 0,
+        "last_failure": 0
+    },
+    "moonshotai/kimi-k2.6:free": {
+        "success": 0,
+        "failure": 0,
+        "score": 100,
+        "last_success": 0,
+        "last_failure": 0
+    },
+    "mistralai/mistral-small-3.2-24b:free": {
+        "success": 0,
+        "failure": 0,
+        "score": 100,
+        "last_success": 0,
+        "last_failure": 0
+    }
+}

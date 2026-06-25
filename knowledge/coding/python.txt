@@ -1,0 +1,11 @@
+Python is a high level programming language.
+
+Popular uses:
+
+Web Development
+AI
+Automation
+Data Science
+Machine Learning
+Cybersecurity
+Desktop Applications

@@ -1,0 +1,1 @@
+VECTOR_COLLECTION_NAME = "aevex_knowledge"

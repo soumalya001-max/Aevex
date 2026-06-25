@@ -1,0 +1,13 @@
+CSS stands for Cascading Style Sheets.
+
+CSS is used for styling webpages.
+
+Examples:
+
+color
+background
+display
+flex
+grid
+animation
+transition
