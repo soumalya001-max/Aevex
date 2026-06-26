@@ -309,6 +309,104 @@ def delete_folder(
             f"{e}"
         )
     
+# ----------------------------------
+# RENAME FOLDER
+# ----------------------------------
+
+def rename_folder(
+
+    folder_name,
+    new_name,
+    location
+
+):
+
+    try:
+
+        location = location.lower()
+
+        if location == "desktop":
+
+            base_path = os.path.join(
+
+                os.path.expanduser("~"),
+                "Desktop"
+
+            )
+
+        elif location == "documents":
+
+            base_path = os.path.join(
+
+                os.path.expanduser("~"),
+                "Documents"
+
+            )
+
+        elif location == "downloads":
+
+            base_path = os.path.join(
+
+                os.path.expanduser("~"),
+                "Downloads"
+
+            )
+
+        else:
+
+            return (
+                f"Unknown location: "
+                f"{location}"
+            )
+
+        folder_path = os.path.join(
+
+            base_path,
+            folder_name
+
+        )
+
+        new_folder_path = os.path.join(
+
+            base_path,
+            new_name
+
+        )
+
+        if not os.path.exists(folder_path):
+
+            return (
+                f"Folder does not exist: "
+                f"{folder_name}"
+            )
+
+        if os.path.exists(new_folder_path):
+
+            return (
+                f"Folder already exists: "
+                f"{new_name}"
+            )
+
+        os.rename(
+
+            folder_path,
+            new_folder_path
+
+        )
+
+        return (
+            f"Renamed folder "
+            f"{folder_name} "
+            f"to {new_name} "
+            f"in {location}"
+        )
+
+    except Exception as e:
+
+        return (
+            f"Folder rename failed: "
+            f"{e}"
+        )
 
 
 # ----------------------------------

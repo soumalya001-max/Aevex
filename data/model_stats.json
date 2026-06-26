@@ -7,10 +7,10 @@
         "last_failure": 1782296611.345178
     },
     "openai/gpt-oss-120b:free": {
-        "success": 30,
+        "success": 65,
         "failure": 0,
-        "score": 400,
-        "last_success": 1782367448.8215327,
+        "score": 750,
+        "last_success": 1782470520.772505,
         "last_failure": 0
     },
     "openai/gpt-oss-20b:free": {

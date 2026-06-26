@@ -1,73 +1,100 @@
-from voice.listen import listen
-from voice.speak import speak
+import threading
+import time
 
 from core.router import ask_ai
-
-from memory.memory_manager import (
-    add_conversation
-)
-
-from memory.semantic_memory import (
-    update_semantic_memory
-)
+from memory.memory_manager import add_conversation
+from memory.semantic_memory import update_semantic_memory
+from voice.speak import speak
+from voice.wake_manager import WakeManager
 
 
 def start_voice_mode():
+    """Phase 5 voice mode: continuous background listening + wake word.
 
-    print("\nVOICE MODE STARTED\n")
+    Runs continuously until the user explicitly types `exit` in the terminal.
+    """
 
-    while True:
+    print("\nVOICE MODE STARTED (wake word: 'aevex' / 'hey aevex')\n")
 
-        user_input = listen()
+    exit_event = threading.Event()
+    wake_fired = threading.Event()
 
-        if user_input == "":
+    def on_wake():
+        # Callback runs from background thread.
+        wake_fired.set()
 
-            continue
+    wm = WakeManager(on_wake=on_wake)
+    wm.start()
 
-        if user_input.lower() == "exit":
+    def _terminal_exit_watch():
+        while not exit_event.is_set():
+            try:
+                cmd = input("")
+                if cmd is not None and cmd.strip().lower() == "exit":
+                    exit_event.set()
+                    return
+            except Exception:
+                time.sleep(0.2)
 
-            speak(
+    threading.Thread(target=_terminal_exit_watch, daemon=True).start()
 
-                "Goodbye"
+    try:
+        while not exit_event.is_set():
+            # Passive wake polling.
+            if not wake_fired.wait(timeout=0.2):
+                continue
 
-            )
+            wake_fired.clear()
+            if exit_event.is_set():
+                break
 
-            break
+            # Minimal audible confirmation.
+            try:
+                speak("Yes?")
+            except Exception:
+                pass
 
-        response = ask_ai(
+            print("\n[Wake word detected] Recording command...")
 
-            user_input
+            stop_for_command = threading.Event()
+            cmd_text = wm.wait_for_command_text(stop_for_command)
 
-        )
+            if exit_event.is_set():
+                break
 
-        add_conversation(
+            if not cmd_text:
+                print("AEVEX: (no speech detected)")
+                continue
 
-            user_input,
+            if cmd_text.strip().lower() == "exit":
+                speak("Goodbye")
+                break
 
-            response
+            print(f"You (voice): {cmd_text}")
 
-        )
+            try:
+                response = ask_ai(cmd_text)
+            except Exception as e:
+                response = "Sorry, I had trouble processing that."
+                print("[Voice mode] ask_ai failed:", e)
 
-        update_semantic_memory(
+            try:
+                add_conversation(cmd_text, response)
+                update_semantic_memory(cmd_text)
+            except Exception:
+                pass
 
-            user_input
+            print("\nAEVEX:", response)
 
-        )
+            try:
+                speak(response)
+            except Exception as e:
+                print("[Voice mode] speak failed:", e)
 
-        print()
+    finally:
+        try:
+            wm.stop()
+        except Exception:
+            pass
+        exit_event.set()
 
-        print(
-
-            "AEVEX:",
-
-            response
-
-        )
-
-        print()
-
-        speak(
-
-            response
-
-        )

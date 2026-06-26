@@ -4,6 +4,10 @@ import psutil
 import pyautogui
 import time
 import winapps
+import pygetwindow as gw
+
+from agents.verification_agent import VerificationAgent
+from agents.retry_agent import RetryAgent
 
 
 APP_EXECUTABLES = {
@@ -54,6 +58,16 @@ ALIASES = {
     "blue stacks": "bluestacks",
 
     "xbox app": "xbox"
+
+}
+
+
+PROTECTED_APPS = {
+    "explorer.exe",
+    "shellexperiencehost.exe",
+    "startmenuexperiencehost.exe",
+    "searchhost.exe",
+    "dwm.exe"
 }
 
 
@@ -82,31 +96,88 @@ def process_running(process_name):
     return False
 
 
+def get_process_executable(app_name):
+    app_name = normalize_name(app_name)
+    executable = APP_EXECUTABLES.get(app_name)
+    if executable:
+        return executable
+    return app_name.lower() + ".exe" if not app_name.lower().endswith(".exe") else app_name.lower()
+
+
+def has_visible_window(process_name):
+    try:
+        all_windows = gw.getAllWindows()
+        for window in all_windows:
+            try:
+                if window.visible and window.title and window.title.strip():
+                    for proc in psutil.process_iter():
+                        try:
+                            proc_name = proc.name().lower()
+                            if process_name.lower() in proc_name or proc_name in process_name.lower():
+                                return True
+                        except:
+                            pass
+            except:
+                pass
+    except:
+        pass
+    return False
+
+
+def activate_existing_window(app_name):
+    try:
+        executable = get_process_executable(app_name)
+        all_windows = gw.getAllWindows()
+        for window in all_windows:
+            try:
+                if window.visible and window.title and window.title.strip():
+                    for proc in psutil.process_iter():
+                        try:
+                            proc_name = proc.name().lower()
+                            if executable.lower() in proc_name or app_name.lower() in proc_name:
+                                try:
+                                    window.activate()
+                                    window.maximize()
+                                    return True
+                                except:
+                                    pass
+                        except:
+                            pass
+            except:
+                pass
+    except:
+        pass
+    return False
+
+
 def launch_via_search(app_name):
 
-    print(
-        "[Launcher] Falling back to Windows Search..."
-    )
+    try:
 
-    pyautogui.press("win")
+        print(
+            "[Launcher] Falling back to Windows Search..."
+        )
 
-    time.sleep(0.5)
+        pyautogui.press("win")
 
-    pyautogui.write(
-        app_name,
-        interval=0.03
-    )
+        time.sleep(0.5)
 
-    time.sleep(0.5)
+        pyautogui.write(
+            app_name,
+            interval=0.03
+        )
 
-    pyautogui.press(
-        "enter"
-    )
+        time.sleep(0.5)
 
-    return (
-        f"Opened {app_name} "
-        f"using Windows Search."
-    )
+        pyautogui.press(
+            "enter"
+        )
+
+        return True
+
+    except:
+
+        return False
 
 
 def launch_native(app_name):
@@ -188,46 +259,67 @@ def open_application(app_name):
         app_name
     )
 
-    if process_running(app_name):
+    executable = get_process_executable(app_name)
 
+    if has_visible_window(executable):
+        if activate_existing_window(app_name):
+            return f"Activated existing {app_name} window"
+
+    if process_running(app_name):
         return (
             f"{app_name} "
-            f"is already running."
+            f"is already running but has no visible window."
         )
 
-    print(
-        "[Launcher] Trying native launch..."
+    def execute_action():
+
+        if launch_native(app_name):
+            time.sleep(1)
+
+            if VerificationAgent.verify_app_open(
+                app_name
+            ):
+                return True
+
+        if launch_installed_program(app_name):
+            time.sleep(1)
+
+            if VerificationAgent.verify_app_open(
+                app_name
+            ):
+                return True
+
+        if launch_store_app(app_name):
+            time.sleep(1)
+
+            if VerificationAgent.verify_app_open(
+                app_name
+            ):
+                return True
+
+        if launch_via_search(app_name):
+            time.sleep(1)
+
+            if VerificationAgent.verify_app_open(
+                app_name
+            ):
+                return True
+
+        return False
+
+    result = RetryAgent.execute_with_retry(
+        action="open",
+        target=app_name,
+        execute_function=execute_action,
+        verify_function=lambda: VerificationAgent.verify_app_open(app_name),
+        retries=3,
+        delay=1
     )
 
-    if launch_native(app_name):
+    if result["success"]:
+        return f"Successfully opened {app_name}"
 
-        return (
-            f"Opened {app_name}"
-        )
-
-    print(
-        "[Launcher] Trying Store App launch..."
-    )
-
-    if launch_store_app(app_name):
-
-        return (
-            f"Opened {app_name}"
-        )
-
-    print(
-        "[Launcher] Searching installed apps..."
-    )
-
-    if launch_installed_program(app_name):
-
-        return (
-            f"Opened {app_name}"
-        )
-
-    return launch_via_search(
-        app_name
-    )
+    return result["message"]
 
 
 def close_application(app_name):
@@ -236,28 +328,77 @@ def close_application(app_name):
         app_name
     )
 
-    killed = False
+    executable = get_process_executable(app_name)
 
-    for proc in psutil.process_iter():
-
-        try:
-
-            if app_name in proc.name().lower():
-
-                proc.kill()
-
-                killed = True
-
-        except:
-            pass
-
-    if killed:
-
+    if executable in PROTECTED_APPS:
+        closed_windows = close_visible_windows_for_app(app_name)
+        if closed_windows:
+            return f"Successfully closed {app_name} windows"
         return (
-            f"Closed {app_name}"
+            f"{app_name} "
+            f"has no visible windows."
         )
 
-    return (
-        f"{app_name} "
-        f"was not running."
+    if not process_running(app_name):
+
+        return (
+            f"{app_name} "
+            f"is not running."
+        )
+
+    def execute_action():
+        killed = False
+
+        for proc in psutil.process_iter():
+
+            try:
+
+                if app_name in proc.name().lower():
+                    proc.kill()
+                    killed = True
+
+            except:
+                pass
+
+        return killed
+
+    result = RetryAgent.execute_with_retry(
+        action="close",
+        target=app_name,
+        execute_function=execute_action,
+        verify_function=lambda: VerificationAgent.verify_app_closed(app_name),
+        retries=3,
+        delay=1
     )
+
+    if result["success"]:
+        return f"Successfully closed {app_name}"
+
+    return result["message"]
+
+
+def close_visible_windows_for_app(app_name):
+    try:
+        executable = get_process_executable(app_name)
+        all_windows = gw.getAllWindows()
+        closed_any = False
+        for window in all_windows:
+            try:
+                if window.visible and window.title and window.title.strip():
+                    for proc in psutil.process_iter():
+                        try:
+                            proc_name = proc.name().lower()
+                            if executable.lower() in proc_name or app_name.lower() in proc_name:
+                                try:
+                                    window.close()
+                                    closed_any = True
+                                except:
+                                    pass
+                        except:
+                            pass
+            except:
+                pass
+        return closed_any
+    except:
+        pass
+    return False

@@ -1,24 +1,13 @@
-import chromadb
-from sentence_transformers import SentenceTransformer
-
-client = chromadb.PersistentClient(
-    path="vector_memory/chroma_db"
-)
-
-collection = client.get_collection(
-    name="aevex_knowledge"
-)
-
-model = SentenceTransformer(
-    "all-MiniLM-L6-v2"
-)
-
-
 def search_vector_memory(query, n_results=3):
 
-    embedding = model.encode(
+    from vector_memory.embedding_engine import generate_embedding
+    from vector_memory.vector_store import get_collection
+
+    collection = get_collection()
+
+    embedding = generate_embedding(
         query
-    ).tolist()
+    )
 
     results = collection.query(
         query_embeddings=[embedding],

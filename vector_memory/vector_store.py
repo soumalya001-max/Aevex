@@ -1,17 +1,41 @@
-import chromadb
+from functools import lru_cache
 
-client = chromadb.PersistentClient(
-    path="vector_memory/chroma_db"
-)
 
-collection = client.get_or_create_collection(
-    name="aevex_knowledge"
-)
+@lru_cache(maxsize=1)
+def _get_chroma_client():
+
+    import chromadb
+
+    return chromadb.PersistentClient(
+        path="vector_memory/chroma_db"
+    )
+
+
+@lru_cache(maxsize=1)
+def _get_collection():
+
+    client = _get_chroma_client()
+
+    return client.get_or_create_collection(
+        name="aevex_knowledge"
+    )
+
+
+def get_client():
+
+    return _get_chroma_client()
+
+
+def get_collection():
+
+    return _get_collection()
 
 
 def reset_collection():
 
-    global collection
+    import chromadb
+
+    client = _get_chroma_client()
 
     try:
 
@@ -19,8 +43,11 @@ def reset_collection():
             "aevex_knowledge"
         )
     except:
+
         pass
 
-    collection = client.get_or_create_collection(
+    new_collection = client.get_or_create_collection(
         name="aevex_knowledge"
     )
+
+    return new_collection

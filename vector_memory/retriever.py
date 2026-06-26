@@ -1,5 +1,5 @@
 from vector_memory.embedding_engine import generate_embedding
-from vector_memory.vector_store import collection
+from vector_memory.vector_store import get_collection
 
 
 def retrieve_context(
@@ -10,6 +10,8 @@ def retrieve_context(
     embedding = generate_embedding(
         query
     )
+
+    collection = get_collection()
 
     results = collection.query(
 

@@ -20,12 +20,26 @@ def create_plan(prompt):
 
         target = open_match.group(1)
 
+        # Strip window/launch modifiers from target
+        modifiers = [
+            "in a new window", "in new window", "new window of",
+            "in chrome", "in firefox", "in edge", "in browser",
+            "in a new tab", "in new tab", "new tab",
+            "in background", "in the background",
+            "as administrator", "as admin",
+        ]
+        for mod in modifiers:
+            target = target.replace(mod, "").strip()
+
         if (
             "youtube" in target or
             "facebook" in target or
+            "instagram" in target or
             "gmail" in target or
             "discord" in target or
-            "pw" in target
+            "pw" in target or
+            "github" in target or
+            "chatgpt" in target
         ):
 
             plan.append({
@@ -38,21 +52,11 @@ def create_plan(prompt):
 
         else:
 
-            target = target.replace(
-                "in chrome",
-                ""
-            ).strip()
-
-            target = target.replace(
-                "new window of",
-                ""
-            ).strip()
-
             plan.append({
 
                 "action": "open_app",
 
-                "target": target
+                "target": target.strip()
 
             })
 
@@ -68,6 +72,17 @@ def create_plan(prompt):
     if close_match:
 
         target = close_match.group(1)
+
+        # Strip window/launch modifiers from target
+        modifiers = [
+            "in a new window", "in new window", "new window of",
+            "in chrome", "in firefox", "in edge", "in browser",
+            "in a new tab", "in new tab", "new tab",
+            "in background", "in the background",
+            "as administrator", "as admin",
+        ]
+        for mod in modifiers:
+            target = target.replace(mod, "").strip()
 
         if "tab" in target:
 

@@ -30,7 +30,7 @@
         "cooldown_until": 1782296641.3337631
     },
     "openai/gpt-oss-120b:free": {
-        "successes": 30,
+        "successes": 65,
         "failures": 0,
         "cooldown_until": 0
     }

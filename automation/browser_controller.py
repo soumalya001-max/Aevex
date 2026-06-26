@@ -1,4 +1,37 @@
 import pyautogui
+import time
+
+from agents.verification_agent import VerificationAgent
+from agents.retry_agent import RetryAgent
+
+
+WEBSITE_MAP = {
+
+    "youtube":
+        "https://www.youtube.com",
+
+    "gmail":
+        "https://mail.google.com",
+
+    "facebook":
+        "https://www.facebook.com",
+
+    "instagram":
+        "https://www.instagram.com",
+
+    "github":
+        "https://github.com",
+
+    "chatgpt":
+        "https://chatgpt.com",
+
+    "discord":
+        "https://discord.com/app",
+
+    "pw":
+        "https://www.pw.live"
+
+}
 
 
 def new_tab():
@@ -42,12 +75,27 @@ def previous_tab():
     return "Moved to previous tab."
 
 
-def search_google():
+def search_google(query=None):
 
     pyautogui.hotkey(
         "ctrl",
         "l"
     )
+
+    if query:
+        pyautogui.write(
+            query,
+            interval=0.02
+        )
+
+        pyautogui.press(
+            "enter"
+        )
+
+        return (
+            f"Searched Google for "
+            f"{query}"
+        )
 
     return "Focused on the search bar."
 
@@ -128,22 +176,57 @@ def open_downloads():
         "j"
     )
 
-    return "Opened downloads."
+    return "Opened download."
 
 
 def open_website(url):
 
-    pyautogui.hotkey(
-        "ctrl",
-        "l"
+    original_url = url
+    url = url.lower().strip()
+
+    if url in WEBSITE_MAP:
+        url = WEBSITE_MAP[url]
+
+    elif not url.startswith(
+        "http"
+    ):
+
+        url = (
+            "https://"
+            + url
+        )
+
+    def execute_action():
+        pyautogui.hotkey(
+            "ctrl",
+            "l"
+        )
+
+        time.sleep(
+            0.2
+        )
+
+        pyautogui.write(
+            url,
+            interval=0.02
+        )
+
+        pyautogui.press(
+            "enter"
+        )
+
+        return True
+
+    result = RetryAgent.execute_with_retry(
+        action="open",
+        target=original_url,
+        execute_function=execute_action,
+        verify_function=lambda: VerificationAgent.verify_website_open(original_url),
+        retries=3,
+        delay=1
     )
 
-    pyautogui.typewrite(
-        url
-    )
+    if result["success"]:
+        return f"Successfully opened website: {url}"
 
-    pyautogui.press(
-        "enter"
-    )
-
-    return f"Opened website: {url}"
+    return result["message"]
